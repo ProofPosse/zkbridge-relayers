@@ -5,7 +5,7 @@ const UpdaterContract = artifacts.require("UpdaterContract");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("UpdaterContract", function (accounts) {
-    it("get block header fields and hash", async function () {
+    it("getBlockHeaderFields and getBlockHeaderHash", async function () {
         const updaterContract = await UpdaterContract.deployed();
 
         // Create fake block header 1
@@ -53,7 +53,8 @@ contract("UpdaterContract", function (accounts) {
         await updaterContract.headerUpdate(new Uint8Array(0),
             blockHeaderByteArray1, blockHeaderByteArray0);
 
-        var {0: success1, 1: getBlockHeader1} = await updaterContract.getBlockHeader.call(1);
+        var {0: success1, 1: getBlockHeader1, 2: lcs1} =
+            await updaterContract.getBlockHeader.call(1);
         assert.isTrue(success1);
         assert.equal(getBlockHeader1, web3.utils.bytesToHex(blockHeaderByteArray1));
 
@@ -75,7 +76,8 @@ contract("UpdaterContract", function (accounts) {
         await updaterContract.headerUpdate(new Uint8Array(0),
             blockHeaderByteArray2, blockHeaderByteArray1);
 
-        var {0: success2, 1: getBlockHeader2} = await updaterContract.getBlockHeader.call(2);
+        var {0: success2, 1: getBlockHeader2, 2: lcs2} =
+            await updaterContract.getBlockHeader.call(2);
         assert.isTrue(success2);
         assert.equal(getBlockHeader2, web3.utils.bytesToHex(blockHeaderByteArray2));
 
@@ -86,7 +88,8 @@ contract("UpdaterContract", function (accounts) {
         await updaterContract.headerUpdate(new Uint8Array(0),
             blockHeaderByteArray1, blockHeaderByteArray0);
 
-        var {0: bad, 1: getBlockHeader0} = await updaterContract.getBlockHeader.call(0);
+        var {0: bad, 1: getBlockHeader0, 2: lcs0} =
+            await updaterContract.getBlockHeader.call(0);
         assert.isFalse(bad);
     });
 });
