@@ -52,6 +52,39 @@ contract UpdaterContract {
         return true;
     }
 
+    function batchedHeaderUpdate(
+        bytes memory proof,
+        bytes[] memory headers
+    ) public returns(bool) {
+        // Check if first block exists
+        bytes32 prevHash = getBlockHeaderHash(headers[0]);
+        headerInfo memory prevEntry = headerDAG[prevHash];
+        if (!prevEntry.exists) {
+            if (!headerDAGEmpty) {
+                return false;
+            }
+            headerDAGEmpty = false;
+        }
+
+        if (!LightClient.verifyBatch(proof, LCS, headers)) {
+            return false;
+        }
+
+        // Update state
+        for (uint256 i = 1; i < headers.length; i++) {
+            bytes32 currHash = getBlockHeaderHash(headers[i]);
+            (bytes32 prevBlockHash, uint256 blockNumber) = getBlockHeaderFields(
+                headers[i]);
+            headerDAG[currHash].exists = true;
+            headerDAG[currHash].prevBlockHash = prevBlockHash;
+            numberToHeader[blockNumber].exists = true;
+            numberToHeader[blockNumber].blockHeader = headers[i];
+            LightClient.update(LCS, headers[i], headers[i - 1]);
+        }
+
+        return true;
+    }
+
     function getBlockHeader(uint256 blockNumber) public view returns(
         bool success,
         bytes memory blockHeader,

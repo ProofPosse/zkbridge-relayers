@@ -25,4 +25,14 @@ library LightClient {
         // Dummy implementation always returns true
         return LCS.notImplemented || !LCS.notImplemented;
     }
+
+    function verifyBatch(
+        bytes memory /* proof */,
+        lightClientState storage LCS,
+        bytes[] memory /* headers */
+    ) public view returns(bool) {
+        // Read LCS to prevent compiler telling us to change view -> pure
+        // Dummy implementation always returns true
+        return LCS.notImplemented || !LCS.notImplemented;
+    }
 }
