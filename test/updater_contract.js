@@ -6,7 +6,7 @@ const UpdaterContract = artifacts.require("UpdaterContract");
  */
 contract("UpdaterContract", function (accounts) {
     it("getBlockHeaderFields and getBlockHeaderHash", async function () {
-        const updaterContract = await UpdaterContract.deployed();
+        const updaterContract = await UpdaterContract.deployed(false);
 
         // Create fake block header 1
         const blockHeaderByteArray1 = new Uint8Array(600);
@@ -38,7 +38,7 @@ contract("UpdaterContract", function (accounts) {
         assert.equal(solComputedHash, blockHeaderHash1);
     });
     it("headerUpdate and getBlockHeader sanity", async function () {
-        const updaterContract = await UpdaterContract.deployed();
+        const updaterContract = await UpdaterContract.deployed(false);
 
         // Dummy block
         const blockHeaderByteArray0 = new Uint8Array(600);
