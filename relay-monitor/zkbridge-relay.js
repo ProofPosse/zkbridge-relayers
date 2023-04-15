@@ -5,7 +5,7 @@ var web3 = new Web3(Web3.givenProvider || "wss://eth-mainnet.g.alchemy.com/v2/Ve
 // const address = 
 // const abi = 
 
-myContract = new web3.eth.Contract(abi, address);
+// myContract = new web3.eth.Contract(abi, address);
 var prevBlockHeader = {};
 
 var subscription = web3.eth.subscribe('newBlockHeaders', function(error, currBlockHeader){
