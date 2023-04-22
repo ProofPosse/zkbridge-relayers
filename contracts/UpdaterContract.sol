@@ -2,6 +2,7 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "./LightClient.sol";
+import "./SourceChain.sol";
 
 
 contract UpdaterContract {
@@ -33,7 +34,7 @@ contract UpdaterContract {
         bytes memory prevBlockHeader
     ) public returns(bool) {
         // Check if parent exists
-        bytes32 prevHash = getBlockHeaderHash(prevBlockHeader);
+        bytes32 prevHash = SourceChain.getBlockHeaderHash(prevBlockHeader);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -46,7 +47,7 @@ contract UpdaterContract {
             bytes32 prevBlockHash,
             uint256 blockNumber,
             bytes memory syncCommittee
-        ) = getBlockHeaderFields(currBlockHeader);
+        ) = SourceChain.getBlockHeaderFields(currBlockHeader);
 
         if (!skippingBlockPolicy ||
             keccak256(currSyncCommittee) != keccak256(syncCommittee)) {
@@ -63,7 +64,7 @@ contract UpdaterContract {
         }
 
         // Update state
-        bytes32 currHash = getBlockHeaderHash(currBlockHeader);
+        bytes32 currHash = SourceChain.getBlockHeaderHash(currBlockHeader);
         // TODO Handle block number conflicts
         headerDAG[currHash].exists = true;
         headerDAG[currHash].prevBlockHash = prevBlockHash;
@@ -84,7 +85,7 @@ contract UpdaterContract {
         }
 
         // Check if first block exists
-        bytes32 prevHash = getBlockHeaderHash(headers[0]);
+        bytes32 prevHash = SourceChain.getBlockHeaderHash(headers[0]);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -99,11 +100,11 @@ contract UpdaterContract {
 
         // Update state
         for (uint256 i = 1; i < headers.length; i++) {
-            bytes32 currHash = getBlockHeaderHash(headers[i]);
+            bytes32 currHash = SourceChain.getBlockHeaderHash(headers[i]);
             (
                 bytes32 prevBlockHash,
                 uint256 blockNumber,
-            ) = getBlockHeaderFields(headers[i]);
+            ) = SourceChain.getBlockHeaderFields(headers[i]);
             headerDAG[currHash].exists = true;
             headerDAG[currHash].prevBlockHash = prevBlockHash;
             numberToHeader[blockNumber].exists = true;
@@ -145,32 +146,5 @@ contract UpdaterContract {
         }
         blockHeader = numberToHeader[blockNumber].blockHeader;
         _LCS = LCS;
-    }
-
-    function getBlockHeaderFields(
-        bytes memory blockHeader
-    ) public pure returns(
-        bytes32 prevBlockHash,
-        uint256 blockNumber,
-        bytes memory syncCommittee
-    ) {
-        bytes32 blockNumberBytes;
-        // prevBlockHash is located at bytes 32 + [0:32] and blockNumber
-        // is located at 32 + [468:500] because we need to skip the first
-        // 32 bytes (reserved for the length of the byte string).
-        /* solium-disable-next-line */
-        assembly {
-            prevBlockHash := mload(add(blockHeader, 32))
-            blockNumberBytes := mload(add(blockHeader, 500))
-        }
-        blockNumber = uint256(blockNumberBytes);
-        // TODO Get syncCommittee
-        syncCommittee = bytes("TODO");
-    }
-
-    function getBlockHeaderHash(
-        bytes memory blockHeader
-    ) public pure returns(bytes32) {
-        return keccak256(blockHeader);
     }
 }
