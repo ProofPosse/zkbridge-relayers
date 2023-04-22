@@ -1,5 +1,5 @@
 const UpdaterContract = artifacts.require("UpdaterContract");
-const SourceChain = artifacts.require("SourceChain");
+const SenderChain = artifacts.require("SenderChain");
 
 /*
  * accounts = test accounts made available by the Ethereum client (Ganache)
@@ -7,14 +7,14 @@ const SourceChain = artifacts.require("SourceChain");
  */
 contract("UpdaterContract", function (accounts) {
     it("getBlockHeaderFields and getBlockHeaderHash", async function () {
-        const sourceChain = await SourceChain.deployed();
+        const senderChain = await SenderChain.deployed();
 
         // Create fake block header 1
         const blockHeaderByteArray1 = new Uint8Array(600);
         blockHeaderByteArray1[499] = 1;
 
         const {0: prevBlockHash1, 1: blockNumber1} = await
-            sourceChain.getBlockHeaderFields.call(blockHeaderByteArray1);
+            senderChain.getBlockHeaderFields.call(blockHeaderByteArray1);
         assert.equal(blockNumber1, 1);
 
         // Compute hash
@@ -30,12 +30,12 @@ contract("UpdaterContract", function (accounts) {
         blockHeaderByteArray2[499] = 2;
 
         const {0: prevBlockHash2, 1: blockNumber2} = await
-            sourceChain.getBlockHeaderFields.call(blockHeaderByteArray2);
+            senderChain.getBlockHeaderFields.call(blockHeaderByteArray2);
         assert.equal(blockNumber2, 2);
         assert.equal(prevBlockHash2, blockHeaderHash1);
 
         const solComputedHash = await
-            sourceChain.getBlockHeaderHash.call(blockHeaderByteArray1);
+            senderChain.getBlockHeaderHash.call(blockHeaderByteArray1);
         assert.equal(solComputedHash, blockHeaderHash1);
     });
     it("headerUpdate and getBlockHeader sanity", async function () {

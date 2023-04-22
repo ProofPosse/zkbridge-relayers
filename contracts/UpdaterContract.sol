@@ -2,7 +2,7 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "./LightClient.sol";
-import "./SourceChain.sol";
+import "./SenderChain.sol";
 
 
 contract UpdaterContract {
@@ -34,7 +34,7 @@ contract UpdaterContract {
         bytes memory prevBlockHeader
     ) public returns(bool) {
         // Check if parent exists
-        bytes32 prevHash = SourceChain.getBlockHeaderHash(prevBlockHeader);
+        bytes32 prevHash = SenderChain.getBlockHeaderHash(prevBlockHeader);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -47,7 +47,7 @@ contract UpdaterContract {
             bytes32 prevBlockHash,
             uint256 blockNumber,
             bytes memory syncCommittee
-        ) = SourceChain.getBlockHeaderFields(currBlockHeader);
+        ) = SenderChain.getBlockHeaderFields(currBlockHeader);
 
         if (!skippingBlockPolicy ||
             keccak256(currSyncCommittee) != keccak256(syncCommittee)) {
@@ -64,7 +64,7 @@ contract UpdaterContract {
         }
 
         // Update state
-        bytes32 currHash = SourceChain.getBlockHeaderHash(currBlockHeader);
+        bytes32 currHash = SenderChain.getBlockHeaderHash(currBlockHeader);
         // TODO Handle block number conflicts
         headerDAG[currHash].exists = true;
         headerDAG[currHash].prevBlockHash = prevBlockHash;
@@ -85,7 +85,7 @@ contract UpdaterContract {
         }
 
         // Check if first block exists
-        bytes32 prevHash = SourceChain.getBlockHeaderHash(headers[0]);
+        bytes32 prevHash = SenderChain.getBlockHeaderHash(headers[0]);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -100,11 +100,11 @@ contract UpdaterContract {
 
         // Update state
         for (uint256 i = 1; i < headers.length; i++) {
-            bytes32 currHash = SourceChain.getBlockHeaderHash(headers[i]);
+            bytes32 currHash = SenderChain.getBlockHeaderHash(headers[i]);
             (
                 bytes32 prevBlockHash,
                 uint256 blockNumber,
-            ) = SourceChain.getBlockHeaderFields(headers[i]);
+            ) = SenderChain.getBlockHeaderFields(headers[i]);
             headerDAG[currHash].exists = true;
             headerDAG[currHash].prevBlockHash = prevBlockHash;
             numberToHeader[blockNumber].exists = true;
