@@ -19,14 +19,9 @@ contract UpdaterContract {
 
     bool headerDAGEmpty = true;
 
-    bool skippingBlockPolicy;
     bytes currSyncCommittee;
 
     event LogMe(string message);
-
-    constructor (bool _skippingBlockPolicy) {
-        skippingBlockPolicy = _skippingBlockPolicy;
-    }
 
     function headerUpdate(
         bytes memory proof,
@@ -49,7 +44,7 @@ contract UpdaterContract {
             bytes memory syncCommittee
         ) = SenderChain.getBlockHeaderFields(currBlockHeader);
 
-        if (!skippingBlockPolicy ||
+        if (!LightClient.skippingBlockPolicy ||
             keccak256(currSyncCommittee) != keccak256(syncCommittee)) {
             if (!LightClient.verify(
                 proof,
@@ -80,7 +75,7 @@ contract UpdaterContract {
         bytes[] memory headers
     ) public returns(bool) {
         // TODO Implement skipping block policy for batchedHeaderUpdate
-        if (skippingBlockPolicy) {
+        if (LightClient.skippingBlockPolicy) {
             return false;
         }
 
@@ -122,7 +117,7 @@ contract UpdaterContract {
     ) {
         success = numberToHeader[blockNumber].exists;
 
-        if (skippingBlockPolicy && success) {
+        if (LightClient.skippingBlockPolicy && success) {
             bytes memory blockProof = numberToHeader[blockNumber].proof;
             bytes memory currBlockHeader = numberToHeader[
                 blockNumber].blockHeader;

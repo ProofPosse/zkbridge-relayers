@@ -3,6 +3,8 @@ pragma solidity >=0.4.22 <0.9.0;
 
 
 library LightClient {
+    bool constant skippingBlockPolicy = false;
+
     struct lightClientState {
         bool notImplemented;
     }

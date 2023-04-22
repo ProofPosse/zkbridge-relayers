@@ -39,7 +39,7 @@ contract("UpdaterContract", function (accounts) {
         assert.equal(solComputedHash, blockHeaderHash1);
     });
     it("headerUpdate and getBlockHeader sanity", async function () {
-        const updaterContract = await UpdaterContract.deployed(false);
+        const updaterContract = await UpdaterContract.deployed();
 
         // Dummy block
         const blockHeaderByteArray0 = new Uint8Array(600);
