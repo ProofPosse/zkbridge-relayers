@@ -7,8 +7,7 @@ library SenderChain {
         bytes memory blockHeader
     ) public pure returns(
         bytes32 prevBlockHash,
-        uint256 blockNumber,
-        bytes memory syncCommittee
+        uint256 blockNumber
     ) {
         bytes32 blockNumberBytes;
         // prevBlockHash is located at bytes 32 + [0:32] and blockNumber
@@ -20,8 +19,6 @@ library SenderChain {
             blockNumberBytes := mload(add(blockHeader, 500))
         }
         blockNumber = uint256(blockNumberBytes);
-        // TODO Get syncCommittee
-        syncCommittee = bytes("TODO");
     }
 
     function getBlockHeaderHash(

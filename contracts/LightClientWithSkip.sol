@@ -2,7 +2,7 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 
-library LightClient {
+library LightClientWithSkip {
     struct lightClientState {
         bool notImplemented;
     }
@@ -10,7 +10,9 @@ library LightClient {
     function update(
         lightClientState storage LCS,
         bytes memory /* currBlockHeader */,
-        bytes memory /* prevBlockHeader */
+        bytes memory /* prevBlockHeader */,
+        bytes memory /* syncCommittee */,
+        bytes memory /* syncCommitteeProof */
     ) public {
         LCS.notImplemented = true;
     }
@@ -19,17 +21,9 @@ library LightClient {
         bytes memory /* proof */,
         lightClientState storage LCS,
         bytes memory /* currBlockHeader */,
-        bytes memory /* prevBlockHeader */
-    ) public view returns(bool) {
-        // Read LCS to prevent compiler telling us to change view -> pure
-        // Dummy implementation always returns true
-        return LCS.notImplemented || !LCS.notImplemented;
-    }
-
-    function verifyBatch(
-        bytes memory /* proof */,
-        lightClientState storage LCS,
-        bytes[] memory /* headers */
+        bytes memory /* prevBlockHeader */,
+        bytes memory /* syncCommittee */,
+        bytes memory /* syncCommitteeProof */
     ) public view returns(bool) {
         // Read LCS to prevent compiler telling us to change view -> pure
         // Dummy implementation always returns true
