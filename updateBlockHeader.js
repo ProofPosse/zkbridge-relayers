@@ -3,11 +3,8 @@ const LightClient = require('./build/contracts/LightClient.json');
 const UpdaterContract = require('./build/contracts/UpdaterContract.json');
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const INFURA_API_KEY = process.env.INFURA_API_KEY;
-// const etherscan_api_key = process.env.ETHERSCAN_API_KEY;
-// const web3 = new Web3(new Web3.providers.HttpProvider(`https://goerli.infura.io/v3/${INFURA_API_KEY}`));
-// var web3 = new Web3(Web3.givenProvider || "wss://eth-mainnet.g.alchemy.com/v2/Vef8FziF6ZX9cKubyNM9PILPsgBmXFSE");
-var web3 = new Web3(Web3.givenProvider || "wss://eth-goerli.g.alchemy.com/v2/tBDFK7RLgzVfyu5RVMh1wQ0IWnRndbLv");
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
+var web3 = new Web3(Web3.givenProvider || `wss://eth-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}`);
 
 const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
 web3.eth.accounts.wallet.add(account);
@@ -19,24 +16,10 @@ const updaterContractAddress = '0x92F77372b5338257fFd9A37754FD491ac4B9C5d7';
 const lightClient = new web3.eth.Contract(LightClient.abi, lightClientAddress);
 const updater = new web3.eth.Contract(UpdaterContract.abi, updaterContractAddress);
 
-// var Web3 = require('web3');
-// var web3 = new Web3(Web3.givenProvider || "wss://eth-mainnet.g.alchemy.com/v2/Vef8FziF6ZX9cKubyNM9PILPsgBmXFSE");
-
-// Get Header
-
-// async function headerGet(blockNumber) {
-//     try {
-//       const result = await updater.methods.getBlockHeader(blockNumber).send({
-//         from: account.address,
-//         gas: 5000000,
-//       });
-//       console.log('getBlockHeader result:', result);
-//     } catch (error) {
-//       console.error('Error during header update:', error);
-//     }
-//   }
-
-// headerGet(8887512)
+/** 
+ * Update Header
+ * Summary: updating the blockheader
+*/
 
 async function headerUpdate(proof, currBlockHeader, prevBlockHeader) {
     try {
@@ -67,18 +50,10 @@ var subscription = web3.eth.subscribe('newBlockHeaders', function(error, currBlo
 
             headerUpdate(proofAsHexString, currBlockHeaderAsHexString, prevBlockHeaderAsHexString);
         }
-        
-        // update prevblockheader
-
-        // headerUpdate(0, currBlockHeader, prevBlockHeader);
 
         prevBlockHeader = currBlockHeader;
-
-
         return;
     }
 
     console.error(error);
 })
-
-// headerUpdate(0, 1, 0);
