@@ -48,10 +48,14 @@ contract UpdaterContractWithSkip {
             uint256 blockNumber
         ) = SenderChain.getBlockHeaderFields(currBlockHeader);
 
+        // Temp index variable
+        uint256 index = 1;
+
         if (!Merkle.verifyMessage(
             currBlockHeader,
             syncCommittee,
-            syncCommitteeProof
+            syncCommitteeProof,
+            index
         )) {
             return false;
         }
