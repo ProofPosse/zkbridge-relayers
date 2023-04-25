@@ -28,9 +28,11 @@ library Merkle {
         bytes32[] memory proofElements = new bytes32[](proofLength);
 
         for (uint256 i = 0; i < proofLength; i++) {
+            bytes32 temp;
             assembly {
-                proofElements[i] := mload(add(merkleProof, add(32, mul(i, 32))))
+                temp := mload(add(merkleProof, add(32, mul(i, 32))))
             }
+            proofElements[i] = temp;
         }
 
         for (uint256 i = 0; i < proofLength; i++) {
