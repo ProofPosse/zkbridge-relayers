@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+require('dotenv').config();
 const LightClient = require('./build/contracts/LightClient.json');
 const UpdaterContract = require('./build/contracts/UpdaterContract.json');
 
