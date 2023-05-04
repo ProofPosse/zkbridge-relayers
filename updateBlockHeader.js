@@ -38,7 +38,6 @@ var proof = 0
 
 var subscription = web3.eth.subscribe('newBlockHeaders', function(error, currBlockHeader){
     if (!error) {
-        console.log(currBlockHeader);
         if (Object.keys(prevBlockHeader).length != 0) {
             // call headerUpdate
             // myContract.methods.headerUpdate(null, currBlockHeader, prevBlockHeader).send();
