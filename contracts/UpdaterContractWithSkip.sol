@@ -12,7 +12,7 @@ contract UpdaterContractWithSkip {
     struct headerInfo {
         bool exists;
         bytes32 prevBlockHash;
-        bytes blockHeader;
+        SenderChain.bh blockHeader;
         bytes proof;
         bytes syncCommittee;
         bytes syncCommitteeProof;
@@ -28,13 +28,33 @@ contract UpdaterContractWithSkip {
 
     function headerUpdate(
         bytes memory proof,
+        uint256 currBlockNumber,
         bytes memory currBlockHeader,
+        uint256 prevBlockNumber,
         bytes memory prevBlockHeader,
         bytes memory syncCommittee,
         bytes memory syncCommitteeProof
     ) public returns(bool) {
+        SenderChain.bh memory curr;
+        SenderChain.bh memory prev;
+        curr.asBytes = currBlockHeader;
+        curr.blockNumber = currBlockNumber;
+        prev.asBytes = prevBlockHeader;
+        prev.blockNumber = prevBlockNumber;
+        return headerUpdateCore(
+            proof, curr, prev, syncCommittee, syncCommitteeProof
+        );
+    }
+
+    function headerUpdateCore(
+        bytes memory proof,
+        SenderChain.bh memory currBlockHeader,
+        SenderChain.bh memory prevBlockHeader,
+        bytes memory syncCommittee,
+        bytes memory syncCommitteeProof
+    ) public returns(bool) {
         // Check if parent exists
-        bytes32 prevHash = keccak256(prevBlockHeader);
+        bytes32 prevHash = SenderChain.getBlockHeaderHash(prevBlockHeader);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -77,7 +97,7 @@ contract UpdaterContractWithSkip {
         }
 
         // Update state
-        bytes32 currHash = keccak256(currBlockHeader);
+        bytes32 currHash = SenderChain.getBlockHeaderHash(currBlockHeader);
         // TODO Handle block number conflicts
         headerDAG[currHash].exists = true;
         headerDAG[currHash].prevBlockHash = prevHash;
@@ -99,9 +119,9 @@ contract UpdaterContractWithSkip {
 
         if (success) {
             bytes memory blockProof = numberToHeader[blockNumber].proof;
-            bytes memory currBlockHeader = numberToHeader[
+            SenderChain.bh memory currBlockHeader = numberToHeader[
                 blockNumber].blockHeader;
-            bytes memory prevBlockHeader = numberToHeader[
+            SenderChain.bh memory prevBlockHeader = numberToHeader[
                 blockNumber - 1].blockHeader;
             bytes memory syncCommittee = numberToHeader[
                 blockNumber - 1].syncCommittee;
@@ -127,7 +147,8 @@ contract UpdaterContractWithSkip {
                 );
             }
         }
-        blockHeader = numberToHeader[blockNumber].blockHeader;
+        blockHeader = SenderChain.getBlockHeaderBytes(
+            numberToHeader[blockNumber].blockHeader);
         _LCS = LCS;
     }
 }

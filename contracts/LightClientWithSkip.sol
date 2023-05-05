@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
+import "./SenderChain.sol";
+
 
 library LightClientWithSkip {
     struct lightClientState {
@@ -9,8 +11,8 @@ library LightClientWithSkip {
 
     function update(
         lightClientState storage LCS,
-        bytes memory /* currBlockHeader */,
-        bytes memory /* prevBlockHeader */,
+        SenderChain.bh memory /* currBlockHeader */,
+        SenderChain.bh memory /* prevBlockHeader */,
         bytes memory /* syncCommittee */,
         bytes memory /* syncCommitteeProof */
     ) public {
@@ -20,8 +22,8 @@ library LightClientWithSkip {
     function verify(
         bytes memory /* proof */,
         lightClientState storage LCS,
-        bytes memory /* currBlockHeader */,
-        bytes memory /* prevBlockHeader */,
+        SenderChain.bh memory /* currBlockHeader */,
+        SenderChain.bh memory /* prevBlockHeader */,
         bytes memory /* syncCommittee */,
         bytes memory /* syncCommitteeProof */
     ) public view returns(bool) {
