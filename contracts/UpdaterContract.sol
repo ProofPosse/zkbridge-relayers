@@ -28,7 +28,7 @@ contract UpdaterContract {
         bytes memory prevBlockHeader
     ) public returns(bool) {
         // Check if parent exists
-        bytes32 prevHash = SenderChain.getBlockHeaderHash(prevBlockHeader);
+        bytes32 prevHash = keccak256(prevBlockHeader);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -38,7 +38,6 @@ contract UpdaterContract {
         }
 
         (
-            bytes32 prevBlockHash,
             uint256 blockNumber
         ) = SenderChain.getBlockHeaderFields(currBlockHeader);
 
@@ -53,10 +52,10 @@ contract UpdaterContract {
         LightClient.update(LCS, currBlockHeader, prevBlockHeader);
 
         // Update state
-        bytes32 currHash = SenderChain.getBlockHeaderHash(currBlockHeader);
+        bytes32 currHash = keccak256(currBlockHeader);
         // TODO Handle block number conflicts
         headerDAG[currHash].exists = true;
-        headerDAG[currHash].prevBlockHash = prevBlockHash;
+        headerDAG[currHash].prevBlockHash = prevHash;
         numberToHeader[blockNumber].exists = true;
         numberToHeader[blockNumber].blockHeader = currBlockHeader;
         numberToHeader[blockNumber].proof = proof;
@@ -69,7 +68,7 @@ contract UpdaterContract {
         bytes[] memory headers
     ) public returns(bool) {
         // Check if first block exists
-        bytes32 prevHash = SenderChain.getBlockHeaderHash(headers[0]);
+        bytes32 prevHash = keccak256(headers[0]);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -84,16 +83,16 @@ contract UpdaterContract {
 
         // Update state
         for (uint256 i = 1; i < headers.length; i++) {
-            bytes32 currHash = SenderChain.getBlockHeaderHash(headers[i]);
+            bytes32 currHash = keccak256(headers[i]);
             (
-                bytes32 prevBlockHash,
                 uint256 blockNumber
             ) = SenderChain.getBlockHeaderFields(headers[i]);
             headerDAG[currHash].exists = true;
-            headerDAG[currHash].prevBlockHash = prevBlockHash;
+            headerDAG[currHash].prevBlockHash = prevHash;
             numberToHeader[blockNumber].exists = true;
             numberToHeader[blockNumber].blockHeader = headers[i];
             LightClient.update(LCS, headers[i], headers[i - 1]);
+            prevHash = currHash;
         }
 
         return true;
