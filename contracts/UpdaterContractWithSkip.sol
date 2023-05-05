@@ -3,8 +3,8 @@ pragma solidity >=0.4.22 <0.9.0;
 
 import "./LightClientWithSkip.sol";
 import "./SenderChain.sol";
-import "./Merkle.sol";
-
+import "./EthMerkle.sol";
+import "solidity-rlp/contracts/RLPReader.sol";
 
 contract UpdaterContractWithSkip {
     LightClientWithSkip.lightClientState LCS;
@@ -15,7 +15,7 @@ contract UpdaterContractWithSkip {
         bytes blockHeader;
         bytes proof;
         bytes syncCommittee;
-        bytes syncCommitteeProof;
+        RLPReader.RLPItem[] syncCommitteeProof;
     }
     mapping (bytes32 => headerInfo) headerDAG;
     mapping (uint256 => headerInfo) numberToHeader;
@@ -31,7 +31,7 @@ contract UpdaterContractWithSkip {
         bytes memory currBlockHeader,
         bytes memory prevBlockHeader,
         bytes memory syncCommittee,
-        bytes memory syncCommitteeProof
+        RLPReader.RLPItem[] memory syncCommitteeProof
     ) public returns(bool) {
         // Check if parent exists
         bytes32 prevHash = keccak256(prevBlockHeader);
@@ -47,11 +47,13 @@ contract UpdaterContractWithSkip {
             uint256 blockNumber
         ) = SenderChain.getBlockHeaderFields(currBlockHeader);
 
-        if (!Merkle.verifyMessage(
+        bytes memory returnValue = EthMerkle.extractProofValue(
             currBlockHeader,
             syncCommittee,
             syncCommitteeProof
-        )) {
+        );
+
+        if (returnValue.length == 0) {
             return false;
         }
 
@@ -105,7 +107,7 @@ contract UpdaterContractWithSkip {
                 blockNumber - 1].blockHeader;
             bytes memory syncCommittee = numberToHeader[
                 blockNumber - 1].syncCommittee;
-            bytes memory syncCommitteeProof = numberToHeader[
+            RLPReader.RLPItem[] memory syncCommitteeProof = numberToHeader[
                 blockNumber - 1].syncCommitteeProof;
 
             if (!LightClientWithSkip.verify(
