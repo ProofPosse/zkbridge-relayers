@@ -12,7 +12,7 @@ contract UpdaterContract {
     struct headerInfo {
         bool exists;
         bytes32 prevBlockHash;
-        bytes blockHeader;
+        SenderChain.bh blockHeader;
         bytes proof;
     }
     mapping (bytes32 => headerInfo) headerDAG;
@@ -22,13 +22,30 @@ contract UpdaterContract {
 
     event LogMe(string message);
 
+    // Convenient preprocessing function that sits on top of headerUpdateCore
     function headerUpdate(
         bytes memory proof,
+        uint256 currBlockNumber,
         bytes memory currBlockHeader,
+        uint256 prevBlockNumber,
         bytes memory prevBlockHeader
     ) public returns(bool) {
+        SenderChain.bh memory curr;
+        SenderChain.bh memory prev;
+        curr.asBytes = currBlockHeader;
+        curr.blockNumber = currBlockNumber;
+        prev.asBytes = prevBlockHeader;
+        prev.blockNumber = prevBlockNumber;
+        return headerUpdateCore(proof, curr, prev);
+    }
+
+    function headerUpdateCore(
+        bytes memory proof,
+        SenderChain.bh memory currBlockHeader,
+        SenderChain.bh memory prevBlockHeader
+    ) public returns(bool) {
         // Check if parent exists
-        bytes32 prevHash = keccak256(prevBlockHeader);
+        bytes32 prevHash = SenderChain.getBlockHeaderHash(prevBlockHeader);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -52,7 +69,7 @@ contract UpdaterContract {
         LightClient.update(LCS, currBlockHeader, prevBlockHeader);
 
         // Update state
-        bytes32 currHash = keccak256(currBlockHeader);
+        bytes32 currHash = SenderChain.getBlockHeaderHash(currBlockHeader);
         // TODO Handle block number conflicts
         headerDAG[currHash].exists = true;
         headerDAG[currHash].prevBlockHash = prevHash;
@@ -63,12 +80,12 @@ contract UpdaterContract {
         return true;
     }
 
-    function batchedHeaderUpdate(
+    function batchedHeaderUpdateCore(
         bytes memory proof,
-        bytes[] memory headers
+        SenderChain.bh[] memory headers
     ) public returns(bool) {
         // Check if first block exists
-        bytes32 prevHash = keccak256(headers[0]);
+        bytes32 prevHash = SenderChain.getBlockHeaderHash(headers[0]);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -83,7 +100,7 @@ contract UpdaterContract {
 
         // Update state
         for (uint256 i = 1; i < headers.length; i++) {
-            bytes32 currHash = keccak256(headers[i]);
+            bytes32 currHash = SenderChain.getBlockHeaderHash(headers[i]);
             (
                 uint256 blockNumber
             ) = SenderChain.getBlockHeaderFields(headers[i]);
@@ -104,7 +121,8 @@ contract UpdaterContract {
         LightClient.lightClientState memory _LCS
     ) {
         success = numberToHeader[blockNumber].exists;
-        blockHeader = numberToHeader[blockNumber].blockHeader;
+        blockHeader = SenderChain.getBlockHeaderBytes(
+            numberToHeader[blockNumber].blockHeader);
         _LCS = LCS;
     }
 }

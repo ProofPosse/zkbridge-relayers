@@ -3,20 +3,29 @@ pragma solidity >=0.4.22 <0.9.0;
 
 
 library SenderChain {
+    struct bh {
+        uint256 blockNumber;
+        bytes asBytes;
+    }
+
     // Feel free to add more return values
     function getBlockHeaderFields(
-        bytes memory blockHeader
+        bh memory blockHeader
     ) public pure returns(
         uint256 blockNumber
     ) {
-        bytes32 blockNumberBytes;
-        // blockNumber is located at 32 + [468:500] because we
-        // need to skip the first 32 bytes (reserved for the
-        // length of the byte string).
-        /* solium-disable-next-line */
-        assembly {
-            blockNumberBytes := mload(add(blockHeader, 500))
-        }
-        blockNumber = uint256(blockNumberBytes);
+        return blockHeader.blockNumber;
+    }
+
+    function getBlockHeaderHash(
+        bh memory blockHeader
+    ) public pure returns(bytes32) {
+        return keccak256(blockHeader.asBytes);
+    }
+
+    function getBlockHeaderBytes(
+        bh memory blockHeader
+    ) public pure returns(bytes memory) {
+        return blockHeader.asBytes;
     }
 }

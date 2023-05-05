@@ -7,6 +7,7 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "solidity-rlp/contracts/RLPReader.sol";
+import "./SenderChain.sol";
 
 library EthMerkle {
     using RLPReader for RLPReader.RLPItem;
@@ -21,18 +22,18 @@ library EthMerkle {
         }
     }
 
-    function extractTransactionsRoot(bytes memory blockHeader)
+    function extractTransactionsRoot(SenderChain.bh memory blockHeader)
         internal
         pure
         returns (bytes32)
     {
-        RLPReader.RLPItem[] memory decodedHeader = blockHeader.toRlpItem().toList();
+        RLPReader.RLPItem[] memory decodedHeader = blockHeader.asBytes.toRlpItem().toList();
         bytes32 transactionsRoot = bytesToBytes32(decodedHeader[5].toBytes());
         return transactionsRoot;
     }
 
     function extractProofValue(
-        bytes memory blockHeader,
+        SenderChain.bh memory blockHeader,
         bytes memory path,
         RLPReader.RLPItem[] memory stack
     ) internal pure returns (bytes memory value) {
