@@ -23,7 +23,23 @@ module.exports = {
       timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
      },
-     development: {
+    mumbai: {
+      provider: () => new HDWalletProvider(privateKey, `https://rpc-mumbai.maticvigil.com/v1/${matic_testnet_api_key}`),
+      network_id: 80001, // Mumbai's chain ID
+      gas: 5000000,
+      confirmations: 1,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+    },
+    bsctestnet: {
+      provider: () => new HDWalletProvider(privateKey, `https://data-seed-prebsc-1-s1.binance.org:8545/`),
+      network_id: 97, // BSC testnet's chain ID
+      gas: 5000000,
+      confirmations: 1,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+     },
+    development: {
       host: "127.0.0.1",
       port: 8545,
       network_id: "*", // Match any network id
