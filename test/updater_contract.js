@@ -7,25 +7,6 @@ const SenderChain = artifacts.require("SenderChain");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("UpdaterContract", function (accounts) {
-    it("getBlockHeaderFields", async function () {
-        const senderChain = await SenderChain.deployed();
-
-        // Create fake block header 1
-        const blockHeaderByteArray1 = new Uint8Array(600);
-        blockHeaderByteArray1[499] = 1;
-
-        const blockNumber1 = await
-            senderChain.getBlockHeaderFields.call(blockHeaderByteArray1);
-        assert.equal(blockNumber1, 1);
-
-        // Create fake block header 2
-        const blockHeaderByteArray2 = new Uint8Array(600);
-        blockHeaderByteArray2[499] = 2;
-
-        const blockNumber2 = await
-            senderChain.getBlockHeaderFields.call(blockHeaderByteArray2);
-        assert.equal(blockNumber2, 2);
-    });
     it("headerUpdate and getBlockHeader sanity", async function () {
         const updaterContract = await UpdaterContract.deployed();
 
@@ -37,10 +18,10 @@ contract("UpdaterContract", function (accounts) {
         blockHeaderByteArray1[499] = 1;
 
         var success1 = await updaterContract.headerUpdate.call(
-            new Uint8Array(0), blockHeaderByteArray1, blockHeaderByteArray0);
+            new Uint8Array(0), 1, blockHeaderByteArray1, 0, blockHeaderByteArray0);
         assert.isTrue(success1);
         await updaterContract.headerUpdate(new Uint8Array(0),
-            blockHeaderByteArray1, blockHeaderByteArray0);
+            1, blockHeaderByteArray1, 0, blockHeaderByteArray0);
 
         var {0: success1, 1: getBlockHeader1, 2: lcs1} =
             await updaterContract.getBlockHeader.call(1);
@@ -52,10 +33,10 @@ contract("UpdaterContract", function (accounts) {
         blockHeaderByteArray2[499] = 2;
 
         var success2 = await updaterContract.headerUpdate.call(
-            new Uint8Array(0), blockHeaderByteArray2, blockHeaderByteArray1);
+            new Uint8Array(0), 2, blockHeaderByteArray2, 1, blockHeaderByteArray1);
         assert.isTrue(success2);
         await updaterContract.headerUpdate(new Uint8Array(0),
-            blockHeaderByteArray2, blockHeaderByteArray1);
+            2, blockHeaderByteArray2, 1, blockHeaderByteArray1);
 
         var {0: success2, 1: getBlockHeader2, 2: lcs2} =
             await updaterContract.getBlockHeader.call(2);
@@ -64,10 +45,10 @@ contract("UpdaterContract", function (accounts) {
 
         // Try to add bad parent block
         var bad = await updaterContract.headerUpdate.call(
-            new Uint8Array(0), blockHeaderByteArray1, blockHeaderByteArray0);
+            new Uint8Array(0), 1, blockHeaderByteArray1, 0, blockHeaderByteArray0);
         assert.isFalse(bad);
         await updaterContract.headerUpdate(new Uint8Array(0),
-            blockHeaderByteArray1, blockHeaderByteArray0);
+            1, blockHeaderByteArray1, 0, blockHeaderByteArray0);
 
         var {0: bad, 1: getBlockHeader0, 2: lcs0} =
             await updaterContract.getBlockHeader.call(0);
@@ -86,7 +67,9 @@ contract("UpdaterContract", function (accounts) {
 
         var success1 = await updaterContractWithSkip.headerUpdate.call(
             new Uint8Array(0),
+            1,
             blockHeaderByteArray1,
+            0,
             blockHeaderByteArray0,
             new Uint8Array(0),
             new Uint8Array(0)
@@ -94,7 +77,9 @@ contract("UpdaterContract", function (accounts) {
         assert.isTrue(success1);
         await updaterContractWithSkip.headerUpdate(
             new Uint8Array(0),
+            1,
             blockHeaderByteArray1,
+            0,
             blockHeaderByteArray0,
             new Uint8Array(0),
             new Uint8Array(0)
@@ -111,7 +96,9 @@ contract("UpdaterContract", function (accounts) {
 
         var success2 = await updaterContractWithSkip.headerUpdate.call(
             new Uint8Array(0),
+            2,
             blockHeaderByteArray2,
+            1,
             blockHeaderByteArray1,
             new Uint8Array(0),
             new Uint8Array(0)
@@ -119,7 +106,9 @@ contract("UpdaterContract", function (accounts) {
         assert.isTrue(success2);
         await updaterContractWithSkip.headerUpdate(
             new Uint8Array(0),
+            2,
             blockHeaderByteArray2,
+            1,
             blockHeaderByteArray1,
             new Uint8Array(0),
             new Uint8Array(0)
@@ -133,7 +122,9 @@ contract("UpdaterContract", function (accounts) {
         // Try to add bad parent block
         var bad = await updaterContractWithSkip.headerUpdate.call(
             new Uint8Array(0),
+            1,
             blockHeaderByteArray1,
+            0,
             blockHeaderByteArray0,
             new Uint8Array(0),
             new Uint8Array(0)
@@ -141,7 +132,9 @@ contract("UpdaterContract", function (accounts) {
         assert.isFalse(bad);
         await updaterContractWithSkip.headerUpdate(
             new Uint8Array(0),
+            1,
             blockHeaderByteArray1,
+            0,
             blockHeaderByteArray0,
             new Uint8Array(0),
             new Uint8Array(0)
