@@ -22,6 +22,7 @@ contract UpdaterContract {
 
     event LogMe(string message);
 
+    // Convenient preprocessing function that sits on top of headerUpdateCore
     function headerUpdate(
         bytes memory proof,
         uint256 currBlockNumber,
