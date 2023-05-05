@@ -13,7 +13,7 @@ library LightClientWithSkip {
         bytes memory /* currBlockHeader */,
         bytes memory /* prevBlockHeader */,
         bytes memory /* syncCommittee */,
-        RLPReader.RLPItem[1024] memory /* syncCommitteeProof */
+        RLPReader.RLPItem[] memory /* syncCommitteeProof */
     ) public {
         LCS.notImplemented = true;
     }
@@ -24,7 +24,7 @@ library LightClientWithSkip {
         bytes memory /* currBlockHeader */,
         bytes memory /* prevBlockHeader */,
         bytes memory /* syncCommittee */,
-        RLPReader.RLPItem[1024] memory /* syncCommitteeProof */
+        RLPReader.RLPItem[] memory /* syncCommitteeProof */
     ) public view returns(bool) {
         // Read LCS to prevent compiler telling us to change view -> pure
         // Dummy implementation always returns true
