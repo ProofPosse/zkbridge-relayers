@@ -11,10 +11,8 @@ const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address;
 
-const lightClientAddress = '0x4a482E66849E01B91fe4E6dc8728B0285A89FD4F';
-const updaterContractAddress = '0x92F77372b5338257fFd9A37754FD491ac4B9C5d7';
+const updaterContractAddress = process.env.UPDATER_CONTRACT_ADDRESS;
 
-const lightClient = new web3.eth.Contract(LightClient.abi, lightClientAddress);
 const updater = new web3.eth.Contract(UpdaterContract.abi, updaterContractAddress);
 
 /** 
@@ -24,6 +22,7 @@ const updater = new web3.eth.Contract(UpdaterContract.abi, updaterContractAddres
 
 async function headerGet(blockNumber) {
     try {
+      console.log('calling getBlockHeader');
       const result = await updater.methods.getBlockHeader(blockNumber).send({
         from: account.address,
         gas: 5000000,
@@ -34,4 +33,4 @@ async function headerGet(blockNumber) {
     }
   }
 
-headerGet(8887512)
+headerGet(8943335)
