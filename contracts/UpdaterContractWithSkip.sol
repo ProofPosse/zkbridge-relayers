@@ -9,13 +9,16 @@ import "solidity-rlp/contracts/RLPReader.sol";
 contract UpdaterContractWithSkip {
     LightClientWithSkip.lightClientState LCS;
 
+    using RLPReader for RLPReader.RLPItem;
+    using RLPReader for bytes;
+
     struct headerInfo {
         bool exists;
         bytes32 prevBlockHash;
         bytes blockHeader;
         bytes proof;
         bytes syncCommittee;
-        RLPReader.RLPItem[] syncCommitteeProof;
+        RLPReader.RLPItem syncCommitteeProof;
     }
     mapping (bytes32 => headerInfo) headerDAG;
     mapping (uint256 => headerInfo) numberToHeader;
@@ -31,7 +34,7 @@ contract UpdaterContractWithSkip {
         bytes memory currBlockHeader,
         bytes memory prevBlockHeader,
         bytes memory syncCommittee,
-        RLPReader.RLPItem[] memory syncCommitteeProof
+        bytes memory syncCommitteeProof
     ) public returns(bool) {
         // Check if parent exists
         bytes32 prevHash = keccak256(prevBlockHeader);
@@ -50,7 +53,7 @@ contract UpdaterContractWithSkip {
         bytes memory returnValue = EthMerkle.extractProofValue(
             currBlockHeader,
             syncCommittee,
-            syncCommitteeProof
+            syncCommitteeProof.toList()
         );
 
         if (returnValue.length == 0) {
@@ -64,7 +67,7 @@ contract UpdaterContractWithSkip {
                 currBlockHeader,
                 prevBlockHeader,
                 syncCommittee,
-                syncCommitteeProof
+                syncCommitteeProof.toList()
             )) {
                 return false;
             }
@@ -74,7 +77,7 @@ contract UpdaterContractWithSkip {
                 currBlockHeader,
                 prevBlockHeader,
                 syncCommittee,
-                syncCommitteeProof
+                syncCommitteeProof.toList()
             );
         }
 
@@ -107,7 +110,7 @@ contract UpdaterContractWithSkip {
                 blockNumber - 1].blockHeader;
             bytes memory syncCommittee = numberToHeader[
                 blockNumber - 1].syncCommittee;
-            RLPReader.RLPItem[] memory syncCommitteeProof = numberToHeader[
+            RLPReader.RLPItem memory syncCommitteeProof = numberToHeader[
                 blockNumber - 1].syncCommitteeProof;
 
             if (!LightClientWithSkip.verify(
@@ -116,7 +119,7 @@ contract UpdaterContractWithSkip {
                 currBlockHeader,
                 prevBlockHeader,
                 syncCommittee,
-                syncCommitteeProof
+                syncCommitteeProof.toList()
             )) {
                 success = false;
             } else {
@@ -125,7 +128,7 @@ contract UpdaterContractWithSkip {
                     currBlockHeader,
                     prevBlockHeader,
                     syncCommittee,
-                    syncCommitteeProof
+                    syncCommitteeProof.toList()
                 );
             }
         }
