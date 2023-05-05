@@ -23,6 +23,12 @@ module.exports = {
       timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
      },
+     development: {
+      host: "127.0.0.1",
+      port: 8545,
+      network_id: "*", // Match any network id
+      gas: 5000000,
+    },
   },
  
   // Set default mocha options here, use special reporters etc.
