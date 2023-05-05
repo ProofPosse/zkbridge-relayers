@@ -34,7 +34,7 @@ contract UpdaterContractWithSkip {
         bytes memory syncCommitteeProof
     ) public returns(bool) {
         // Check if parent exists
-        bytes32 prevHash = SenderChain.getBlockHeaderHash(prevBlockHeader);
+        bytes32 prevHash = keccak256(prevBlockHeader);
         headerInfo memory prevEntry = headerDAG[prevHash];
         if (!prevEntry.exists) {
             if (!headerDAGEmpty) {
@@ -44,7 +44,6 @@ contract UpdaterContractWithSkip {
         }
 
         (
-            bytes32 prevBlockHash,
             uint256 blockNumber
         ) = SenderChain.getBlockHeaderFields(currBlockHeader);
 
@@ -78,10 +77,10 @@ contract UpdaterContractWithSkip {
         }
 
         // Update state
-        bytes32 currHash = SenderChain.getBlockHeaderHash(currBlockHeader);
+        bytes32 currHash = keccak256(currBlockHeader);
         // TODO Handle block number conflicts
         headerDAG[currHash].exists = true;
-        headerDAG[currHash].prevBlockHash = prevBlockHash;
+        headerDAG[currHash].prevBlockHash = prevHash;
         numberToHeader[blockNumber].exists = true;
         numberToHeader[blockNumber].blockHeader = currBlockHeader;
         numberToHeader[blockNumber].proof = proof;
