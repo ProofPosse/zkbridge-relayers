@@ -14,6 +14,8 @@ node getBlockHeader.js
 
 To run tests:
 
+Install Ganache first and start local development chain
+
 ```
 truffle test
 ```
