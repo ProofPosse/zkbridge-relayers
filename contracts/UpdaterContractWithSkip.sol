@@ -110,7 +110,7 @@ contract UpdaterContractWithSkip {
         return true;
     }
 
-    function getBlockHeader(uint256 blockNumber) public returns(
+    function getBlockHeaderCore(uint256 blockNumber) public returns(
         bool success,
         bytes memory blockHeader,
         LightClientWithSkip.lightClientState memory _LCS

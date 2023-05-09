@@ -115,7 +115,7 @@ contract UpdaterContract {
         return true;
     }
 
-    function getBlockHeader(uint256 blockNumber) public view returns(
+    function getBlockHeaderCore(uint256 blockNumber) public view returns(
         bool success,
         bytes memory blockHeader,
         LightClient.lightClientState memory _LCS
