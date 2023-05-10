@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+const ethers = require('ethers');
 require('dotenv').config();
 const RLP = require('rlp');
 const UpdaterContract = require('./build/contracts/UpdaterContract.json');
@@ -11,7 +12,7 @@ var web3 = null;
 
 if (process.env.NETWORK == 'development') {
   const WebsocketProvider = Web3.providers.WebsocketProvider;
-  const websocketURL = "ws://127.0.0.1:8545"; // Replace with the appropriate WebSocket URL
+  const websocketURL = "ws://127.0.0.1:7545"; // Replace with the appropriate WebSocket URL
   const websocketProvider = new WebsocketProvider(websocketURL);
   web3 = new Web3(websocketProvider);
 } else if (process.env.NETWORK == 'goerli') {
@@ -37,6 +38,21 @@ web3.eth.getAccounts().then((accounts) => {
   console.log("accounts: ", accounts);
 });
 
+// updater.events.HeaderUpdateEvent({}, (error, event) => {
+//     if (error) {
+//         console.error(error);
+//     } else {
+//         console.log("HeaderUpdateEvent:", event.returnValues);
+//     }
+// });
+
+function concatenateUint8Arrays(array1, array2) {
+  const result = new Uint8Array(array1.length + array2.length);
+  result.set(array1, 0);
+  result.set(array2, array1.length);
+  return result;
+}
+
 async function headerUpdate(proof, currBlockNumber, currBlockHeader, prevBlockNumber, prevBlockHeader) {
     try {
       // Convert the block headers to RLP-encoded bytes
@@ -57,7 +73,7 @@ async function headerUpdate(proof, currBlockNumber, currBlockHeader, prevBlockNu
         currBlockHeader.mixHash,
         currBlockHeader.nonce
       ]);
-
+      
       const prevBlockHeaderBytes = RLP.encode([
         prevBlockHeader.parentHash,
         prevBlockHeader.sha3Uncles,
@@ -76,12 +92,46 @@ async function headerUpdate(proof, currBlockNumber, currBlockHeader, prevBlockNu
         prevBlockHeader.nonce
       ])
 
-      const blockHeaderByteArray1 = new Uint8Array(600);
-      blockHeaderByteArray1[499] = 1;
+      const dummy = new Uint8Array(600).fill(0);
+      
+      const targetLength = 600;
 
-      const result = await updater.methods.headerUpdate(proof, currBlockNumber, blockHeaderByteArray1, prevBlockNumber, blockHeaderByteArray1).call({
+      const currPadding = new Uint8Array(targetLength - currBlockHeaderBytes.length, 0);
+      const fixedLengthCurrBlockHeaderBytes = concatenateUint8Arrays(currBlockHeaderBytes, currPadding);
+
+      const prevPadding = new Uint8Array(targetLength - prevBlockHeaderBytes.length, 0);
+      const fixedLengthPrevBlockHeaderBytes = concatenateUint8Arrays(prevBlockHeaderBytes, prevPadding);
+
+      console.log(dummy);
+      console.log(fixedLengthCurrBlockHeaderBytes);
+
+      // const currBlockHeaderHexString = web3.utils.bytesToHex(currBlockHeaderBytes);
+      // const prevBlockHeaderHexString = web3.utils.bytesToHex(prevBlockHeaderBytes);  
+
+      // const currBlockHeaderAsHexString = web3.utils.toHex(JSON.stringify(currBlockHeader));
+      // const prevBlockHeaderAsHexString = web3.utils.toHex(JSON.stringify(prevBlockHeader));
+
+      // const currBlockHeaderHex = '0x' + currBlockHeaderBytes.toString('hex');
+      // const prevBlockHeaderHex = '0x' + prevBlockHeaderBytes.toString('hex');
+
+      // const currBlockHeaderHex =  '0x' + Buffer.from(currBlockHeaderBytes).toString('hex');
+      // const prevBlockHeaderHex = '0x' + Buffer.from(prevBlockHeaderBytes).toString('hex');
+
+      const result = await updater.methods.headerUpdate(proof, currBlockNumber, fixedLengthCurrBlockHeaderBytes, prevBlockNumber, fixedLengthPrevBlockHeaderBytes).send({
         from: account.address,
+        gas: 2000000
       });
+
+      // const blockHeaderByteArray1 = new Uint8Array(600);
+      // blockHeaderByteArray1[499] = 1;
+
+      // const blockHeaderByteArray2 = new Uint8Array(600);
+      // blockHeaderByteArray2[499] = 2;
+
+      // const result = await updater.methods.headerUpdate(proof, 2, blockHeaderByteArray2, 1, blockHeaderByteArray1).send({
+      //   from: account.address,
+      //   gas: 1000000
+      // });
       
       console.log('Header update result:', result);
 
@@ -92,12 +142,27 @@ async function headerUpdate(proof, currBlockNumber, currBlockHeader, prevBlockNu
       console.log('getBlockHeader number:', currBlockNumber);
       console.log('getBlockHeader result:', result2);
 
+      // console.log('calling getBlockHeader');
+      // const result2 = await updater.methods.getBlockHeaderCore(1).call({
+      //   from: account.address,
+      // });
+
+      // console.log('getBlockHeader number:', 1);
+      // console.log('getBlockHeader result:', result2);
+
+      // console.log('calling getBlockHeader');
+      // const result3 = await updater.methods.getBlockHeaderCore(2).call({
+      //   from: account.address,
+      // });
+      // console.log('getBlockHeader number:', 2);
+      // console.log('getBlockHeader result:', result3);
+
     } catch (error) {
       console.error('Error during header update:', error);
     }
   }
 
-var prevBlockHeader = {};
+var prevBlockHeader = {}
 
 var proof = new Uint8Array(0);
 
@@ -123,3 +188,19 @@ var subscription = web3.eth.subscribe('newBlockHeaders', function(error, currBlo
 
     console.error(error);
 })
+
+// async function headerUpdateManual() {
+//   const blockHeaderByteArray1 = new Uint8Array(600);
+//   blockHeaderByteArray1[499] = 1;
+
+//   const blockHeaderByteArray2 = new Uint8Array(600);
+//   blockHeaderByteArray2[499] = 2;
+
+//   const result = await updater.methods.headerUpdate(proof, 2, blockHeaderByteArray2, 1, blockHeaderByteArray1).call({
+//     from: account.address,
+//   });
+
+//   console.log('Header update result:', result);
+// }
+
+// headerUpdateManual();
