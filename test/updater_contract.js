@@ -23,25 +23,41 @@ contract("UpdaterContract", function (accounts) {
         await updaterContract.headerUpdate(new Uint8Array(0),
             1, blockHeaderByteArray1, 0, blockHeaderByteArray0);
 
+         // Create fake block header 2
+         const blockHeaderByteArray2 = new Uint8Array(600);
+         blockHeaderByteArray2[499] = 2;
+ 
+         var success2 = await updaterContract.headerUpdate.call(
+             new Uint8Array(0), 2, blockHeaderByteArray2, 1, blockHeaderByteArray1);
+         assert.isTrue(success2);
+         await updaterContract.headerUpdate(new Uint8Array(0),
+             2, blockHeaderByteArray2, 1, blockHeaderByteArray1);
+
+        // Create fake block header 3
+        const blockHeaderByteArray3 = new Uint8Array(600);
+        blockHeaderByteArray3[499] = 3;
+
+        var success3 = await updaterContract.headerUpdate.call(
+            new Uint8Array(0), 3, blockHeaderByteArray3, 2, blockHeaderByteArray2);
+        assert.isTrue(success3);
+        await updaterContract.headerUpdate(new Uint8Array(0),
+            3, blockHeaderByteArray3, 2, blockHeaderByteArray2);
+
+
+        
+
         var {0: success1, 1: getBlockHeader1, 2: lcs1} =
-            await updaterContract.getBlockHeader.call(1);
+            await updaterContract.getBlockHeaderCore.call(1);
         assert.isTrue(success1);
         assert.equal(getBlockHeader1, web3.utils.bytesToHex(blockHeaderByteArray1));
 
-        // Create fake block header 2
-        const blockHeaderByteArray2 = new Uint8Array(600);
-        blockHeaderByteArray2[499] = 2;
-
-        var success2 = await updaterContract.headerUpdate.call(
-            new Uint8Array(0), 2, blockHeaderByteArray2, 1, blockHeaderByteArray1);
-        assert.isTrue(success2);
-        await updaterContract.headerUpdate(new Uint8Array(0),
-            2, blockHeaderByteArray2, 1, blockHeaderByteArray1);
-
         var {0: success2, 1: getBlockHeader2, 2: lcs2} =
-            await updaterContract.getBlockHeader.call(2);
+            await updaterContract.getBlockHeaderCore.call(2);
         assert.isTrue(success2);
         assert.equal(getBlockHeader2, web3.utils.bytesToHex(blockHeaderByteArray2));
+
+
+
 
         // Try to add bad parent block
         var bad = await updaterContract.headerUpdate.call(
@@ -51,7 +67,7 @@ contract("UpdaterContract", function (accounts) {
             1, blockHeaderByteArray1, 0, blockHeaderByteArray0);
 
         var {0: bad, 1: getBlockHeader0, 2: lcs0} =
-            await updaterContract.getBlockHeader.call(0);
+            await updaterContract.getBlockHeaderCore.call(0);
         assert.isFalse(bad);
     });
     it("headerUpdate and getBlockHeader sanity (with skip)", async function () {
@@ -86,7 +102,7 @@ contract("UpdaterContract", function (accounts) {
         );
 
         var {0: success1, 1: getBlockHeader1, 2: lcs1} =
-            await updaterContractWithSkip.getBlockHeader.call(1);
+            await updaterContractWithSkip.getBlockHeaderCore.call(1);
         assert.isTrue(success1);
         assert.equal(getBlockHeader1, web3.utils.bytesToHex(blockHeaderByteArray1));
 
@@ -115,7 +131,7 @@ contract("UpdaterContract", function (accounts) {
         );
 
         var {0: success2, 1: getBlockHeader2, 2: lcs2} =
-            await updaterContractWithSkip.getBlockHeader.call(2);
+            await updaterContractWithSkip.getBlockHeaderCore.call(2);
         assert.isTrue(success2);
         assert.equal(getBlockHeader2, web3.utils.bytesToHex(blockHeaderByteArray2));
 
@@ -141,7 +157,7 @@ contract("UpdaterContract", function (accounts) {
         );
 
         var {0: bad, 1: getBlockHeader0, 2: lcs0} =
-            await updaterContractWithSkip.getBlockHeader.call(0);
+            await updaterContractWithSkip.getBlockHeaderCore.call(0);
         assert.isFalse(bad);
     });
 });
