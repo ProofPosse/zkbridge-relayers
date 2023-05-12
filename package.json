@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "dotenv": "^16.0.3",
+    "ethers": "^6.3.0",
     "ethlint": "^1.2.5",
+    "rlp": "^3.0.0",
     "truffle": "^5.8.4",
     "web3": "^1.9.0"
   }

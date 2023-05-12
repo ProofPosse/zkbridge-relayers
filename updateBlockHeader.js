@@ -7,33 +7,43 @@ const UpdaterContract = require('./build/contracts/UpdaterContract.json');
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
 
-var web3 = null;
+var sender_web3 = null;
+var reciever_web3 = null;
 
-if (process.env.NETWORK == 'development') {
+if (process.env.SENDER_NETWORK == 'development') {
   const WebsocketProvider = Web3.providers.WebsocketProvider;
   const websocketURL = "ws://127.0.0.1:7545"; // Replace with the appropriate WebSocket URL
   const websocketProvider = new WebsocketProvider(websocketURL);
-  web3 = new Web3(websocketProvider);
-} else if (process.env.NETWORK == 'goerli') {
-  web3 = new Web3(Web3.givenProvider || `wss://eth-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}`);
+  sender_web3 = new Web3(websocketProvider);
+} else if (process.env.SENDER_NETWORK == 'goerli') {
+  sender_web3 = new Web3(Web3.givenProvider || `wss://eth-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}`);
+}
+
+if (process.env.RECEIVER_NETWORK == 'development') {
+  const WebsocketProvider = Web3.providers.WebsocketProvider;
+  const websocketURL = "ws://127.0.0.1:7545"; // Replace with the appropriate WebSocket URL
+  const websocketProvider = new WebsocketProvider(websocketURL);
+  reciever_web3 = new Web3(websocketProvider);
+} else if (process.env.RECEIVER_NETWORK == 'goerli') {
+  reciever_web3 = new Web3(Web3.givenProvider || `wss://eth-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}`);
 }
 
 // var web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8545");
 
-const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address;
+const account = reciever_web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
+reciever_web3.eth.accounts.wallet.add(account);
+reciever_web3.eth.defaultAccount = account.address;
 
 const updaterContractAddress = process.env.UPDATER_CONTRACT_ADDRESS;
 
-const updater = new web3.eth.Contract(UpdaterContract.abi, updaterContractAddress);
+const updater = new reciever_web3.eth.Contract(UpdaterContract.abi, updaterContractAddress);
 
 /** 
  * Update Header
  * Summary: updating the blockheader
 */
 
-web3.eth.getAccounts().then((accounts) => {
+reciever_web3.eth.getAccounts().then((accounts) => {
   console.log("accounts: ", accounts);
 });
 
@@ -117,11 +127,14 @@ async function headerUpdate(proof, currBlockNumber, currBlockHeader, prevBlockNu
 
 var prevBlockHeader = {}
 
-var proof = new Uint8Array(0);
-
-var subscription = web3.eth.subscribe('newBlockHeaders', function(error, currBlockHeader){
+var subscription = sender_web3.eth.subscribe('newBlockHeaders', function(error, currBlockHeader){
     if (!error) {
         console.log("currBlockHeader: ", currBlockHeader)
+
+        // TODO: currently a dummy proof, but can be replaced with proof API
+        // const proof = await fetchProofData(prevBlockHeader, currBlockHeader);
+
+        var proof = new Uint8Array(0);
 
         if (Object.keys(prevBlockHeader).length != 0) {
             // call headerUpdate
