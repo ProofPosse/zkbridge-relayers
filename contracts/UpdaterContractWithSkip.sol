@@ -44,7 +44,7 @@ contract UpdaterContractWithSkip {
         curr.blockNumber = currBlockNumber;
         prev.asBytes = prevBlockHeader;
         prev.blockNumber = prevBlockNumber;
-        return headerUpdateCore(
+E        return headerUpdateCore(
             proof, curr, prev, syncCommittee, syncCommitteeProof
         );
     }
